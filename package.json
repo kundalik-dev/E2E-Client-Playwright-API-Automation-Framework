@@ -1,9 +1,15 @@
 {
-  "name": "05-E2E-Client-Playwright-API-Automation-Framework",
+  "name": "E2E-Client-Playwright-API-Automation-Framework",
   "version": "1.0.0",
-  "description": "",
+  "description": "E2E automation framework for Playwright and API testing with javascript. ",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:debug": "npx playwright test --debug",
+    "test:report": "npx playwright show-report",
+    "test:report:open": "npx playwright show-report --open"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

@@ -135,12 +135,16 @@ cp .env.sample .env
 ```
 
 ```
-username="your-email@gmail.com"
-password="Admin@123"
+USER_EMAIL="your-email@gmail.com"
+USER_PASSWORD="Admin@123"
 baseURLWithParams="https://rahulshettyacademy.com/client/#/auth/login"
 ```
 
+`playwright.config.js` loads this file via `dotenv` at startup, so any spec can read these through `process.env.USER_EMAIL` / `process.env.USER_PASSWORD`.
+
 > These are demo credentials for the practice application only — no real user data is involved.
+>
+> **Naming note:** avoid generic keys like `username` in `.env` — on Windows, `USERNAME` is a reserved OS environment variable and silently wins over a same-named `.env` value (dotenv does not override existing env vars by default). Prefixed keys like `USER_EMAIL` / `USER_PASSWORD` sidestep this.
 
 ---
 

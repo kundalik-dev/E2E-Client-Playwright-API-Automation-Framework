@@ -1,12 +1,14 @@
 import { test, expect, request } from "@playwright/test";
 
-const loginPayload = { userEmail: process.env.username, userPassword: process.env.password };
+const loginPayload = { userEmail: process.env.USER_EMAIL, userPassword: process.env.USER_PASSWORD };
 
 test.describe("Login API tests @login @ui", () => {
   test.beforeAll(async () => {
-    const apiContext = await request.newContext();
-    await apiContext.post("/client/#/auth/login", { data: loginPayload });
-    console.log(loginPayload);
+    const apiContext = await request.newContext({ baseURL: process.env.baseURLFromEnv });
+    const response = await apiContext.post("/api/ecom/auth/login", { data: loginPayload });
+
+    expect(response.ok()).toBeTruthy();
+    console.log(await response.json());
   });
 
   //   test.beforeEach();

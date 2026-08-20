@@ -4,10 +4,25 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to test"
+        required: true
+        default: "qa"
+        type: choice
+        options:
+          - qa
+          - prod
 jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    # Push/PR runs always target qa; workflow_dispatch lets you pick qa or prod.
+    # The `environment:` key also scopes which GitHub Environment's secrets are used below.
+    environment: ${{ github.event.inputs.environment || 'qa' }}
+    env:
+      ENV: ${{ github.event.inputs.environment || 'qa' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -17,6 +32,14 @@ jobs:
         run: npm install -g pnpm && pnpm install
       - name: Install Playwright Browsers
         run: pnpm exec playwright install --with-deps
+      - name: Create .env.${{ env.ENV }} from secrets
+        run: |
+          cat <<'EOF' > .env.${{ env.ENV }}
+          ENV=${{ env.ENV }}
+          USER_EMAIL=${{ secrets.USER_EMAIL }}
+          USER_PASSWORD=${{ secrets.USER_PASSWORD }}
+          baseURLFromEnv=${{ secrets.BASE_URL }}
+          EOF
       - name: Run Playwright tests
         run: pnpm exec playwright test
       - uses: actions/upload-artifact@v4

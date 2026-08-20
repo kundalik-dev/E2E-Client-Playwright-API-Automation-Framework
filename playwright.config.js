@@ -1,19 +1,35 @@
 // @ts-check
 import { defineConfig, devices } from "@playwright/test";
+import path from "path";
+import fs from "fs";
 
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
 import dotenv from "dotenv";
-import path from "path";
-dotenv.config({ path: path.resolve(import.meta.dirname, ".env") });
 
-console.log("🟢 .env vars loaded from .env:");
+const environment = process.env.ENV || "local";
 
-/**
- * @see https://playwright.dev/docs/test-configuration
- */
+const allowedEnvironments = ["local", "qa", "prod"];
+
+if (!allowedEnvironments.includes(environment)) {
+  throw new Error(
+    `Invalid ENV="${environment}". Expected one of: ${allowedEnvironments.join(", ")}`
+  );
+}
+
+const envFilePath = path.resolve(import.meta.dirname, `.env.${environment}`);
+
+if (!fs.existsSync(envFilePath)) {
+  throw new Error(`Environment file not found: ${envFilePath}`);
+}
+
+dotenv.config({ path: envFilePath });
+
+console.log(`🟢 Environment: ${environment}`);
+console.log(`📁 Loaded: ${envFilePath}`);
+
 export default defineConfig({
   testDir: "./tests",
   /* Run tests in files in parallel */
@@ -41,8 +57,16 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: "setup",
+      testMatch: /.*\.setup\.js/,
+    },
+    {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: process.env.STORAGE_STATE_PATH || "../auth/storageStateAuth.json",
+      },
+      dependencies: ["setup"],
     },
 
     // {

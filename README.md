@@ -9,6 +9,7 @@ A JavaScript + Playwright test automation framework built to practice and demons
 ## Application Under Test
 
 **Site:** `https://rahulshettyacademy.com/client` — a demo shopping application that supports:
+
 - User authentication (login)
 - Product dashboard / catalog browsing
 - Cart management
@@ -21,30 +22,30 @@ It also exposes REST APIs (e.g. login) that are used for API-level testing, so t
 
 ## Tech Stack
 
-| Category            | Tool / Library                          |
-|----------------------|------------------------------------------|
-| Test Runner          | [Playwright Test](https://playwright.dev/) |
-| Language              | JavaScript (ES Modules)                 |
-| Package Manager       | pnpm                                    |
-| API Testing           | Playwright's built-in `request` context |
-| CI/CD                 | GitHub Actions                          |
-| Reporting              | Playwright HTML Reporter                |
-| Environment Config     | `.env` (dotenv-style key/value pairs)   |
+| Category           | Tool / Library                             |
+| ------------------ | ------------------------------------------ |
+| Test Runner        | [Playwright Test](https://playwright.dev/) |
+| Language           | JavaScript (ES Modules)                    |
+| Package Manager    | pnpm                                       |
+| API Testing        | Playwright's built-in `request` context    |
+| CI/CD              | GitHub Actions                             |
+| Reporting          | Playwright HTML Reporter                   |
+| Environment Config | `.env` (dotenv-style key/value pairs)      |
 
 ---
 
 ## Project Structure
 
 ```
-05-E2E-Client-Playwright-API-Automation-Framework/
+E2E-Client-Playwright-API-Automation-Framework/
 ├── .github/workflows/
 │   └── playwright.yml          # CI pipeline — runs full suite on push/PR
 ├── auth-cookie/
 │   └── auth-storage-state.json # Saved Playwright storageState (logged-in session)
 ├── fixtures/
-│   ├── auth.fixtures.js        # Custom fixture: authenticated page/session
-│   └── pages.fixtures.js       # Custom fixture: injects Page Object instances into tests
-├── pages/                      # Page Object Model (POM) — one class per screen
+│   ├── auth.fixture.js        # Custom fixture: authenticated page/session
+│   └── pages.fixture.js       # Custom fixture: injects Page Object instances into tests
+├── pages/                     # Page Object Model (POM) — one class per screen
 │   ├── login.page.js
 │   ├── dashboard.page.js
 │   ├── cart.page.js
@@ -53,17 +54,18 @@ It also exposes REST APIs (e.g. login) that are used for API-level testing, so t
 │   └── order-history.page.js
 ├── tests/
 │   ├── api/                    # Pure API-level tests (request context, no browser UI)
-│   │   └── login.api.spec.js
+│   │   └── login.spec.js
 │   ├── auth/                   # Authentication / session setup specs
 │   │   └── auth.spec.js
 │   ├── e2e/                    # Full end-to-end user journeys (UI + API combined)
-│   │   └── login.e2e.spec.js
+│   │   └── login.spec.js
 │   └── ui/                     # UI-only tests, one spec per page/feature
-│       ├── dashboard-ui.spec.js
-│       ├── cart-ui.spec.js
-│       ├── checkout-ui.spec.js
+│       ├── login.spec.js
+│       ├── dashboard.spec.js
+│       ├── cart.spec.js
+│       ├── checkout.spec.js
 │       ├── order-confirmation.spec.js
-│       └── order-history-ui.spec.js
+│       └── order-history.spec.js
 ├── utils/
 │   └── ApiUtils.js             # Shared helper for building/sending API requests
 ├── playwright.config.js        # Base URL, browser projects, trace/reporter config
@@ -73,10 +75,35 @@ It also exposes REST APIs (e.g. login) that are used for API-level testing, so t
 
 ### Design Patterns Used
 
-- **Page Object Model (POM):** every screen of the app has a matching class in `pages/` that encapsulates its locators and actions, keeping test specs readable and decoupled from UI selectors.
-- **Custom Fixtures:** `fixtures/pages.fixtures.js` wires up Page Object instances so tests can request them directly (e.g. `{ loginPage, cartPage }`) instead of instantiating them manually. `fixtures/auth.fixtures.js` provides a pre-authenticated `page`/context via Playwright's `storageState`, avoiding repeated logins across tests.
-- **API Utilities:** `utils/ApiUtils.js` centralizes API request building (headers, base URL, auth tokens) so API specs stay declarative.
-- **Layered Test Suites:** tests are separated by concern — `api/` (backend contracts), `ui/` (isolated UI behaviour), `auth/` (login/session), and `e2e/` (full user journeys) — so failures are easy to localize.
+- **Page Object Model (POM):**
+  - Every screen of the app has a matching class in `pages/` that encapsulates its locators and actions
+  - Keeping test specs readable and decoupled from UI selectors.
+- **Custom Fixtures:**
+  - `fixtures/pages.fixtures.js` wires up Page Object instances so tests can request them directly (e.g. `{ loginPage, cartPage }`)
+  - Instead of instantiating them manually. `fixtures/auth.fixtures.js` provides a pre-authenticated `page`/context via Playwright's `storageState`, avoiding repeated logins across tests.
+- **API Utilities:**
+  - `utils/ApiUtils.js` centralizes API request building (headers, base URL, auth tokens) so API specs stay declarative.
+- **Layered Test Suites:** tests are separated by concern
+  - `api/` (backend contracts),
+  - `ui/` (isolated UI behaviour),
+  - `auth/` (login/session), and
+  - `e2e/` (full user journeys)
+- so failures are easy to localize.
+
+### Test Naming Convention
+
+- Each test type already lives in its own folder (`tests/api/`, `tests/ui/`, `tests/e2e/`, `tests/auth/`),
+- Spec files are named `<feature-or-page>.spec.js` with no redundant type suffix, e.g.:
+
+```
+tests/ui/login.spec.js     # UI-only login test
+tests/api/login.spec.js    # API-only login test
+tests/e2e/login.spec.js    # full login journey (UI + API)
+```
+
+- Each test is tagged with a title suffix (e.g. `@ui`, `@api`, `@e2e`) to allow filtering by type in CI pipelines or local runs.
+- To filter or run tests by type across folders, use Playwright's `--grep` with a title tag
+- e.g. `test('user can add item to cart @ui', ...)` over encoding the type in the filename.
 
 ---
 
@@ -85,7 +112,7 @@ It also exposes REST APIs (e.g. login) that are used for API-level testing, so t
 ### Prerequisites
 
 - [Node.js](https://nodejs.org/) (LTS)
-- [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+- [pnpm](https://pnpm.io/) (`npm install -g pnpm`) (optional - can use `npm` or `yarn`)
 
 ### Installation
 
@@ -114,22 +141,22 @@ baseURLWithParams="https://rahulshettyacademy.com/client/#/auth/login"
 
 ## Running Tests
 
-| Command                     | Description                                      |
-|------------------------------|---------------------------------------------------|
-| `pnpm test`                   | Run the full test suite headless                  |
-| `pnpm test:headed`            | Run tests with the browser UI visible              |
-| `pnpm test:debug`             | Run tests in Playwright's step-through debug mode  |
-| `pnpm test:report`            | Show the last generated HTML report                |
-| `pnpm test:report:open`       | Show and auto-open the last HTML report             |
+| Command                 | Description                                       |
+| ----------------------- | ------------------------------------------------- |
+| `pnpm test`             | Run the full test suite headless                  |
+| `pnpm test:headed`      | Run tests with the browser UI visible             |
+| `pnpm test:debug`       | Run tests in Playwright's step-through debug mode |
+| `pnpm test:report`      | Show the last generated HTML report               |
+| `pnpm test:report:open` | Show and auto-open the last HTML report           |
 
 Run a single spec or project:
 
 ```bash
-pnpm exec playwright test tests/ui/dashboard-ui.spec.js
+pnpm exec playwright test tests/ui/dashboard.spec.js
 pnpm exec playwright test --project=chromium
 ```
 
-Tests run across **Chromium, Firefox, and WebKit** by default (see `playwright.config.js`).
+Tests run only on `Chromium` to run on `Firefox`, and `WebKit` uncomment them from `playwright.config.js`.
 
 ---
 

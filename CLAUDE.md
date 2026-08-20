@@ -31,13 +31,10 @@ When asked to "implement" or "add" something, check whether the target file alre
   - `tests/ui/` — UI-only tests for a single page/feature
   - `tests/auth/` — login/session setup and auth-related specs
   - `tests/e2e/` — full user journeys combining UI + API
+- **Spec file naming:** the folder (not the filename) distinguishes test type, so name spec files `<feature-or-page>.spec.js` with no `-ui`/`.api`/`.e2e` suffix — e.g. `tests/ui/login.spec.js`, `tests/api/login.spec.js`, `tests/e2e/login.spec.js`. This keeps names stable if a test is later promoted from `ui/` to `e2e/`. If a test needs to be filtered/run across folders by type, use a Playwright title tag (`test('... @ui', ...)` + `--grep`) rather than encoding type in the filename.
 - **Config:** `playwright.config.js` sets `baseURL: "https://rahulshettyacademy.com"` and runs against chromium/firefox/webkit. Don't hardcode the base URL again in tests/pages — use relative paths with `page.goto()` or the configured `baseURL`.
 - **Env vars:** credentials and the login URL come from `.env` (see `.env.sample` for the required keys: `username`, `password`, `baseURLWithParams`). `.env` is git-ignored — never commit real values, though these are dummy-site credentials, not sensitive.
   - Note: `playwright.config.js` currently has `dotenv` import commented out — if a task needs `.env` values loaded (e.g. in fixtures or tests), the dotenv config in `playwright.config.js` needs to be uncommented/enabled first.
-
-## Known naming issue
-
--
 
 ## Running Tests
 
@@ -46,7 +43,7 @@ pnpm install && pnpm exec playwright install --with-deps   # first-time setup
 pnpm test                    # run full suite headless
 pnpm test:headed             # run with browser visible
 pnpm test:debug              # step-through debug mode
-pnpm exec playwright test tests/ui/dashboard-ui.spec.js   # run a single spec
+pnpm exec playwright test tests/ui/dashboard.spec.js       # run a single spec
 ```
 
 ## What Claude Should Do Here

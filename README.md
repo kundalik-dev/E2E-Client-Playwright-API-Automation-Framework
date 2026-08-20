@@ -31,6 +31,8 @@ It also exposes REST APIs (e.g. login) that are used for API-level testing, so t
 | CI/CD              | GitHub Actions                             |
 | Reporting          | Playwright HTML Reporter                   |
 | Environment Config | `.env` (dotenv-style key/value pairs)      |
+| Linting            | ESLint + `eslint-plugin-playwright`        |
+| Formatting         | Prettier                                   |
 
 ---
 
@@ -68,6 +70,9 @@ E2E-Client-Playwright-API-Automation-Framework/
 │       └── order-history.spec.js
 ├── utils/
 │   └── ApiUtils.js             # Shared helper for building/sending API requests
+├── eslint.config.js             # ESLint flat config (base rules + Playwright test rules)
+├── .prettierrc.json             # Prettier formatting rules
+├── .prettierignore              # Files/folders Prettier should skip
 ├── playwright.config.js        # Base URL, browser projects, trace/reporter config
 ├── .env.sample                 # Template for required environment variables
 └── package.json
@@ -79,8 +84,8 @@ E2E-Client-Playwright-API-Automation-Framework/
   - Every screen of the app has a matching class in `pages/` that encapsulates its locators and actions
   - Keeping test specs readable and decoupled from UI selectors.
 - **Custom Fixtures:**
-  - `fixtures/pages.fixtures.js` wires up Page Object instances so tests can request them directly (e.g. `{ loginPage, cartPage }`)
-  - Instead of instantiating them manually. `fixtures/auth.fixtures.js` provides a pre-authenticated `page`/context via Playwright's `storageState`, avoiding repeated logins across tests.
+  - `fixtures/pages.fixture.js` wires up Page Object instances so tests can request them directly (e.g. `{ loginPage, cartPage }`)
+  - Instead of instantiating them manually. `fixtures/auth.fixture.js` provides a pre-authenticated `page`/context via Playwright's `storageState`, avoiding repeated logins across tests.
 - **API Utilities:**
   - `utils/ApiUtils.js` centralizes API request building (headers, base URL, auth tokens) so API specs stay declarative.
 - **Layered Test Suites:** tests are separated by concern
@@ -160,6 +165,24 @@ Tests run only on `Chromium` to run on `Firefox`, and `WebKit` uncomment them fr
 
 ---
 
+## Linting & Formatting
+
+Code quality is enforced with **ESLint** (using [`eslint-plugin-playwright`](https://github.com/playwright-community/eslint-plugin-playwright) for Playwright-specific rules, e.g. flagging missing `await`s on Playwright actions/assertions or disallowing focused/skipped tests from being committed) and **Prettier** (consistent formatting across `.js`, `.json`, and `.md` files).
+
+| Command             | Description                                           |
+| ------------------- | ----------------------------------------------------- |
+| `pnpm lint`         | Check the codebase for lint errors                    |
+| `pnpm lint:fix`     | Auto-fix lint errors where possible                   |
+| `pnpm format`       | Format all files in place with Prettier               |
+| `pnpm format:check` | Check formatting without writing changes (used in CI) |
+
+Run `pnpm lint` and `pnpm format:check` before pushing/opening a PR — this is what a reviewer or CI would check first, and keeping it clean is part of what makes this repo presentable as a portfolio project.
+
+- ESLint config: `eslint.config.js` (flat config) — applies base JS recommended rules everywhere, and Playwright-specific rules only to `tests/**/*.spec.js`.
+- Prettier config: `.prettierrc.json` (formatting rules) and `.prettierignore` (excluded paths, e.g. `node_modules`, `playwright-report`).
+
+---
+
 ## Continuous Integration
 
 Every push and pull request to `main`/`master` triggers a GitHub Actions workflow (`.github/workflows/playwright.yml`) that:
@@ -176,6 +199,7 @@ Every push and pull request to `main`/`master` triggers a GitHub Actions workflo
 
 - [x] Project scaffolding (folders, config, CI pipeline)
 - [x] Playwright config with multi-browser support
+- [x] ESLint + Prettier setup
 - [ ] Login page object + UI login tests
 - [ ] Authenticated session fixture (`storageState` reuse)
 - [ ] Dashboard / product listing tests
